@@ -15,6 +15,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(u => u.Id);
         builder.Property(u => u.Id)
             .HasColumnType("int");
+        builder.Property(e => e.Id)
+            .ValueGeneratedNever();
         builder.Property(u => u.FullName)
             .IsRequired()
             .HasMaxLength(50)

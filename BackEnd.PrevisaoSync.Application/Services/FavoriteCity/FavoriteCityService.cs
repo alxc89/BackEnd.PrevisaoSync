@@ -8,7 +8,7 @@ public class FavoriteCityService(IFavoriteCityRepository repository) : IFavorite
 {
     private readonly IFavoriteCityRepository _repository = repository;
 
-    public async Task<ServiceResponse<FavoriteCityView>> Add(FavoriteCityDto favoriteCity)
+    public async Task<ServiceResponse<FavoriteCityView>> AddAsync(FavoriteCityDto favoriteCity)
     {
         try
         {
@@ -16,8 +16,8 @@ public class FavoriteCityService(IFavoriteCityRepository repository) : IFavorite
             if (exists)
                 return ServiceResponseHelper.Error<FavoriteCityView>("Cidade já existe como favorito!");
 
-            var entity = new Core.Entities.FavoriteCity(favoriteCity.Name, favoriteCity.Code,
-                favoriteCity.Long, favoriteCity.Lat, favoriteCity.UserId);
+            var entity = new Core.Entities.FavoriteCity(favoriteCity.Name, favoriteCity.Code, favoriteCity.Lon, favoriteCity.Lat,
+                favoriteCity.Icon, favoriteCity.Temp, favoriteCity.Feels_like, favoriteCity.Description, favoriteCity.Humidity, favoriteCity.Speed, favoriteCity.UserId);
             var saved = await _repository.Add(entity);
             if (saved is null)
                 return ServiceResponseHelper.Error<FavoriteCityView>("Erro ao salvar a cidade favorita!");
@@ -26,8 +26,14 @@ public class FavoriteCityService(IFavoriteCityRepository repository) : IFavorite
                 Id = saved.Id,
                 Name = saved.Name,
                 Code = saved.Code,
-                Long = saved.Long,
+                Lon = saved.Lon,
                 Lat = saved.Lat,
+                Icon = saved.Icon,
+                Temp = saved.Temp,
+                Feels_like = saved.Feels_like,
+                Description = saved.Description,
+                Humidity = saved.Humidity,
+                Speed = saved.Speed,
                 UserId = saved.UserId
             }, "Cidade salva aos favoritos com sucesso!");
         }
@@ -37,7 +43,7 @@ public class FavoriteCityService(IFavoriteCityRepository repository) : IFavorite
         }
     }
 
-    public async Task<ServiceResponse<IEnumerable<FavoriteCityView>>> FavoriteCities(int userId)
+    public async Task<ServiceResponse<IEnumerable<FavoriteCityView>>> FavoriteCitiesAsync(int userId)
     {
         try
         {
@@ -49,8 +55,14 @@ public class FavoriteCityService(IFavoriteCityRepository repository) : IFavorite
                 Id = c.Id,
                 Name = c.Name,
                 Code = c.Code,
-                Long = c.Long,
+                Lon = c.Lon,
                 Lat = c.Lat,
+                Icon = c.Icon,
+                Description = c.Description,
+                Temp = c.Temp,
+                Feels_like = c.Feels_like,
+                Humidity = c.Humidity,
+                Speed = c.Speed,
                 UserId = c.UserId
             }), "Cidades favoritas encontradas com sucesso!");
         }
@@ -60,7 +72,7 @@ public class FavoriteCityService(IFavoriteCityRepository repository) : IFavorite
         }
     }
 
-    public async Task<ServiceResponse<FavoriteCityView>> GetById(int id, int userId)
+    public async Task<ServiceResponse<FavoriteCityView>> GetByIdAsync(int id, int userId)
     {
         try
         {
@@ -72,8 +84,14 @@ public class FavoriteCityService(IFavoriteCityRepository repository) : IFavorite
                 Id = favoriteCity.Id,
                 Name = favoriteCity.Name,
                 Code = favoriteCity.Code,
-                Long = favoriteCity.Long,
+                Lon = favoriteCity.Lon,
                 Lat = favoriteCity.Lat,
+                Icon = favoriteCity.Icon,
+                Description = favoriteCity.Description,
+                Temp = favoriteCity.Temp,
+                Feels_like = favoriteCity.Feels_like,
+                Humidity = favoriteCity.Humidity,
+                Speed = favoriteCity.Speed,
                 UserId = favoriteCity.UserId
             }, "Cidades favoritas encontradas com sucesso!");
         }
@@ -83,7 +101,7 @@ public class FavoriteCityService(IFavoriteCityRepository repository) : IFavorite
         }
     }
 
-    public async Task<ServiceResponse<bool>> Delete(int id, int userId)
+    public async Task<ServiceResponse<bool>> DeleteAsync(int id, int userId)
     {
         try
         {
@@ -101,16 +119,15 @@ public class FavoriteCityService(IFavoriteCityRepository repository) : IFavorite
         }
     }
 
-    public async Task<ServiceResponse<FavoriteCityView>> Update(FavoriteCityDto favoriteCityDto, int id, int userId)
+    public async Task<ServiceResponse<FavoriteCityView>> UpdateAsync(FavoriteCityDto favoriteCityDto, int id, int userId)
     {
         try
         {
             var favoriteCity = await _repository.GetById(id, userId);
             if (favoriteCity is null)
                 return ServiceResponseHelper.Error<FavoriteCityView>("Nenhuma cidade favorita encontrada!");
-            var updatedCity = new Core.Entities.FavoriteCity(favoriteCityDto.Name, favoriteCityDto.Code,
-                favoriteCityDto.Long, favoriteCityDto.Lat, userId);
-            var updated = await _repository.Update(updatedCity, userId);
+            favoriteCity.Update(favoriteCityDto.Name, favoriteCityDto.Code, favoriteCityDto.Lon, favoriteCityDto.Lat);
+            var updated = await _repository.Update(favoriteCity, userId);
             if (updated is null)
                 return ServiceResponseHelper.Error<FavoriteCityView>("Erro ao salvar a cidade dos favoritos!");
             return ServiceResponseHelper.Success(new FavoriteCityView
@@ -118,8 +135,14 @@ public class FavoriteCityService(IFavoriteCityRepository repository) : IFavorite
                 Id = updated.Id,
                 Name = updated.Name,
                 Code = updated.Code,
-                Long = updated.Long,
+                Lon = updated.Lon,
                 Lat = updated.Lat,
+                Icon = updated.Icon,
+                Description = updated.Description,
+                Temp = updated.Temp,
+                Feels_like = updated.Feels_like,
+                Humidity = updated.Humidity,
+                Speed = updated.Speed,
                 UserId = updated.UserId
             }, "Cidade alterada dos favoritos com sucesso!");
         }

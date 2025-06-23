@@ -27,7 +27,7 @@ public class UserRepository(DataContext context) : IUserRepository
         {
             var user = await _context
                 .Users
-                .FirstOrDefaultAsync(fc => fc.Id.Equals(id));
+                .FirstOrDefaultAsync(u => u.Id.Equals(id));
 
             if (user is not null)
                 _context.Users.Remove(user);
@@ -48,7 +48,7 @@ public class UserRepository(DataContext context) : IUserRepository
         {
             return await _context
                 .Users
-                .FirstOrDefaultAsync(fc => fc.Id.Equals(id));
+                .FirstOrDefaultAsync(u => u.Id.Equals(id));
         }
         catch (Exception e)
         {
@@ -73,6 +73,20 @@ public class UserRepository(DataContext context) : IUserRepository
         catch (Exception e)
         {
             throw new Exception("Erro ao atualizar o usuário!", e);
+        }
+    }
+
+    public async Task<bool> Exists(string email)
+    {
+        try
+        {
+            return await _context
+                .Users
+                .AnyAsync(u => u.Email.Equals(email));
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Erro ao retornar o usuário!", e);
         }
     }
 }

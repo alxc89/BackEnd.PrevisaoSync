@@ -2,7 +2,7 @@
 using BackEnd.PrevisaoSync.Application.Services.FavoriteCity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BackEnd.PrevisaoSync.API.Controllers;
+namespace BackEnd.PrevisaoSync.API.Controllers.FavoriteCity;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -15,7 +15,7 @@ public class FavoriteCityController(IFavoriteCityService favoriteCityService) : 
     {
         try
         {
-            var favoriteCity = _favoriteCityService.GetById(id, userId).Result;
+            var favoriteCity = _favoriteCityService.GetByIdAsync(id, userId).Result;
             if (!favoriteCity.Success)
                 return NotFound("Não foi localizado a cidade nos favoritos para o usuário!");
             if (!favoriteCity.Success)
@@ -34,7 +34,7 @@ public class FavoriteCityController(IFavoriteCityService favoriteCityService) : 
     {
         try
         {
-            var favoriteCities = _favoriteCityService.FavoriteCities(userId).Result;
+            var favoriteCities = _favoriteCityService.FavoriteCitiesAsync(userId).Result;
             if (!favoriteCities.Success)
                 return NotFound("Não foi localizado cidades nos favoritos para o usuários!");
             if (!favoriteCities.Success)
@@ -53,7 +53,7 @@ public class FavoriteCityController(IFavoriteCityService favoriteCityService) : 
     {
         try
         {
-            var favoriteCityAdded = _favoriteCityService.Add(favoriteCityDto).Result;
+            var favoriteCityAdded = _favoriteCityService.AddAsync(favoriteCityDto).Result;
 
             if (!favoriteCityAdded.Success)
                 return BadRequest(favoriteCityAdded.Message);
@@ -71,7 +71,7 @@ public class FavoriteCityController(IFavoriteCityService favoriteCityService) : 
     {
         try
         {
-            var favoriteCityRemoved = _favoriteCityService.Delete(id, userId).Result;
+            var favoriteCityRemoved = _favoriteCityService.DeleteAsync(id, userId).Result;
             if (!favoriteCityRemoved.Success)
                 return BadRequest(favoriteCityRemoved.Message);
             return Ok($"Cidade com o ID {id} removida dos favoritos!");
@@ -87,7 +87,7 @@ public class FavoriteCityController(IFavoriteCityService favoriteCityService) : 
     {
         try
         {
-            var favoriteCityUpdated = _favoriteCityService.Update(favoriteCityDto, id, userId).Result;
+            var favoriteCityUpdated = _favoriteCityService.UpdateAsync(favoriteCityDto, id, userId).Result;
             if (!favoriteCityUpdated.Success)
                 return BadRequest(favoriteCityUpdated.Message);
             return Ok(favoriteCityUpdated.Data);

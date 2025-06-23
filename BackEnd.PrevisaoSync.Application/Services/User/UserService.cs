@@ -1,55 +1,99 @@
 ﻿using BackEnd.PrevisaoSync.Application.Dtos.User;
-using BackEnd.PrevisaoSync.Application.ModelView.FavoriteCity;
 using BackEnd.PrevisaoSync.Application.ModelView.User;
 using BackEnd.PrevisaoSync.Application.Shared;
-using BackEnd.PrevisaoSync.Core.Entities;
+using BackEnd.PrevisaoSync.Core.Interface.Repositories;
 
 namespace BackEnd.PrevisaoSync.Application.Services.User;
-public class UserService(IUserRepository userService) : IUserService
+public class UserService(IUserRepository repository) : IUserService
 {
-    private readonly IUserService _userService = userService;
+    private readonly IUserRepository _repository = repository;
 
-    public Task<ServiceResponse<UserViewModel>> CreateUserAsync(UserDto userDto)
+    public async Task<ServiceResponse<UserViewModel>> CreateUserAsync(UserDto userDto)
     {
         try
         {
-            var exists = await _repository.Exists(favoriteCity.Code);
+            var exists = await _repository.Exists(userDto.Email);
             if (exists)
-                return ServiceResponseHelper.Error<FavoriteCityView>("Cidade já existe como favorito!");
+                return ServiceResponseHelper.Error<UserViewModel>("Já usuário com esse e-mail!");
 
-            var entity = new Core.Entities.FavoriteCity(favoriteCity.Name, favoriteCity.Code,
-                favoriteCity.Long, favoriteCity.Lat, favoriteCity.UserId);
+            var entity = new Core.Entities.User(userDto.FullName, userDto.Email, userDto.Password);
             var saved = await _repository.Add(entity);
             if (saved is null)
-                return ServiceResponseHelper.Error<FavoriteCityView>("Erro ao salvar a cidade favorita!");
-            return ServiceResponseHelper.Success(new FavoriteCityView
+                return ServiceResponseHelper.Error<UserViewModel>("Erro ao salvar o usuário!");
+            return ServiceResponseHelper.Success(new UserViewModel
             {
                 Id = saved.Id,
-                Name = saved.Name,
-                Code = saved.Code,
-                Long = saved.Long,
-                Lat = saved.Lat,
-                UserId = saved.UserId
-            }, "Cidade salva aos favoritos com sucesso!");
+                FullName = saved.FullName,
+                Email = saved.Email
+            }, "Usuário criado com sucesso!");
         }
         catch (Exception e)
         {
-            return ServiceResponseHelper.Error<FavoriteCityView>($"Erro: {e.Message}");
+            return ServiceResponseHelper.Error<UserViewModel>($"Erro: {e.Message}");
         }
     }
 
-    public Task DeleteUserAsync(string userId)
+    public async Task<ServiceResponse<bool>> DeleteUserAsync(int userId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var user = await _repository.GetById(userId);
+            if (user is null)
+                return ServiceResponseHelper.Error<bool>("Já usuário com esse e-mail!");
+
+            var removed = await _repository.Delete(userId);
+            if (!removed)
+                return ServiceResponseHelper.Error<bool>("Erro ao deletar o usuário!");
+            return ServiceResponseHelper.Success(true, "Usuário deletado com sucesso!");
+        }
+        catch (Exception e)
+        {
+            return ServiceResponseHelper.Error<bool>($"Erro: {e.Message}");
+        }
     }
 
-    public Task<ServiceResponse<UserViewModel>> GetUserAsync(string userId)
+    public async Task<ServiceResponse<UserViewModel>> GetUserAsync(int userId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var user = await _repository.GetById(userId);
+            if (user is null)
+                return ServiceResponseHelper.Error<UserViewModel>("Nenhuma cidade favorita encontrada!");
+            return ServiceResponseHelper.Success(new UserViewModel
+            {
+                Id = user.Id,
+                FullName = user.FullName,
+                Email = user.Email,
+            }, "Usuário encontrado com sucesso!");
+        }
+        catch (Exception e)
+        {
+            return ServiceResponseHelper.Error<UserViewModel>($"Erro: {e.Message}");
+        }
     }
 
-    public Task<ServiceResponse<UserViewModel>> UpdateUserAsync(string userId, UserDto userDto)
+    public async Task<ServiceResponse<UserViewModel>> UpdateUserAsync(int userId, UserDto userDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var user = await _repository.GetById(userId);
+            if (user is null)
+                return ServiceResponseHelper.Error<UserViewModel>("Nenhum usuário encontrado!");
+            user.Update(userDto.FullName, userDto.Email);
+            
+            var updated = await _repository.Update(user, userId);
+            if (updated is null)
+                return ServiceResponseHelper.Error<UserViewModel>("Erro ao salvar o usuário!");
+            return ServiceResponseHelper.Success(new UserViewModel
+            {
+                Id = updated.Id,
+                FullName = updated.FullName,
+                Email = updated.Email,
+            }, "Usuário alterado com sucesso!");
+        }
+        catch (Exception e)
+        {
+            return ServiceResponseHelper.Error<UserViewModel>($"Erro: {e.Message}");
+        }
     }
 }

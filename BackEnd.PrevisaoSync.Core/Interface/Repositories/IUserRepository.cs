@@ -7,4 +7,5 @@ public interface IUserRepository
     Task<bool> Delete(int id);
     Task<User> Add(User user);
     Task<User> Update(User user, int id);
+    Task<bool> Exists(string email);
 }

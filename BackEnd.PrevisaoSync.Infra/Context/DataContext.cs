@@ -27,4 +27,5 @@ public class DataContext : DbContext
 
     public DbSet<FavoriteCity> FavoriteCities { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<City> Cities { get; set; }
 }
